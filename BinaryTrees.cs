@@ -8,9 +8,9 @@ namespace MainProgram
     {
 	static void Main(string[] args)
 	{
-	    Graph graph = new Graph();
+	    Graph<string> graph = new Graph<string>();
 	    string label;
-	    Dictionary<string,Node> nodes = new Dictionary<string,Node>();
+	    Dictionary<string,Node<string>> nodes = new Dictionary<string,Node<string>>();
 	    Console.WriteLine("Enter the graph's nodes:");
 	    label = Console.ReadLine();
 	    while (label != "")
@@ -22,7 +22,7 @@ namespace MainProgram
 	    label = Console.ReadLine();
 	    string[] delimiters = { " ", "->", "-" };
 	    string[] edge;
-	    bool directed;
+
 	    while (label != "")
 	    {
 		edge = label.Split(delimiters, System.StringSplitOptions.RemoveEmptyEntries);
@@ -32,16 +32,12 @@ namespace MainProgram
 		if (!nodes.ContainsKey(edge[1])) {
 		    nodes.Add(edge[1], graph.addNodeByLabel(edge[1]));
 		}
-		if (label.Contains(">")) {
-		    directed = true;
-		} else {
-		    directed = false;
-		}
-		graph.addEdge(nodes[edge[0]], nodes[edge[1]], directed);
+
+		graph.addEdge(nodes[edge[0]], nodes[edge[1]], label.Contains(">"));
 		label = Console.ReadLine();
 	    }
 
-	    List<Node> visited = graph.visitAll();
+	    List<Node<string>> visited = graph.visitAll();
 	    for (int i = 0; i < visited.Count; i++) {
 		Console.WriteLine(visited[i].contents);
 	    }
@@ -51,24 +47,24 @@ namespace MainProgram
 
 namespace GraphStructures
 {
-
-    public class Node
+    
+    public class Node<T>
     {
-	private List<Node> edges = new List<Node>();
-	public string contents { get; set; }
+	private List<Node<T>> edges = new List<Node<T>>();
+	public T contents { get; set; }
 	public bool marked { get; set; }
-	
-	public Node(string c) {
+
+	public Node(T c) {
 	    contents = c;
 	}
 	
-	public void addEdge(Node node) {
+	public void addEdge(Node<T> node) {
 	    if (!edges.Contains(node)) {
 		edges.Add(node);
 	    }
 	}
 
-	public void removeEdge(Node node) {
+	public void removeEdge(Node<T> node) {
 	    edges.Remove(node);
 	}
 
@@ -76,7 +72,10 @@ namespace GraphStructures
 	    marked = true;
 	}
 
-	public void visitRecurse(ref List<Node> visited) {
+	/*
+	  Depth-first is recursive
+	 */
+	public void visitRecurse(ref List<Node<T>> visited) {
 	    marked = true;
 	    visited.Add(this);
 	    for (int i = 0; i < edges.Count; i++) {
@@ -90,50 +89,49 @@ namespace GraphStructures
 	    marked = false;
 	}
     }
-    
-    public class Graph
-    {
-	private List<Node> nodes = new List<Node>();
 
-	public void addNode(Node node) {
+    public class Graph<T>
+    {
+	private List<Node<T>> nodes = new List<Node<T>>();
+	
+	public void addNode(Node<T> node) {
 	    nodes.Add(node);
 	}
 
-	public void addEdge(Node start, Node end, bool directed) {
+	public void addEdge(Node<T> start, Node<T> end, bool directed) {
 	    start.addEdge(end);
 	    if (!directed) {
 		end.addEdge(start);
 	    }
 	}
 
-	public Node addNodeByLabel(string label) {
-	    Node node = new Node(label);
+	public Node<T> addNodeByLabel(T label) {
+	    Node<T> node = new Node<T>(label);
 	    nodes.Add(node);
 	    return node;
 	}
 
 	public void clearAll() {
-	    nodes.ForEach(delegate(Node node) {
+	    nodes.ForEach(delegate(Node<T> node) {
 		    node.clear();
 		});
 	}
 
-	public List<Node> visitAll() {
+	public List<Node<T>> visitAll() {
 	    clearAll();
-	    List<Node> visits = new List<Node>();
-	    Node node = nodes[0];
-	    node.visitRecurse(ref visits);
+	    List<Node<T>> visits = new List<Node<T>>();
+	    nodes[0].visitRecurse(ref visits);
 	    clearAll();
 	    return visits;
 	}
     }
 
-    public class Tree : Graph
+    public class Tree<T> : Graph<T>
     {
 	
     }
 
-    public class BinaryTree : Tree
+    public class BinaryTree<T> : Tree<T>
     {
 	
     }

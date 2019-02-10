@@ -9,10 +9,17 @@ namespace MainProgram
 	static void Main(string[] args)
 	{
 	    Graph<string> graph = new Graph<string>();
+	    Graph<int> intgraph = new Graph<int>();
+	    for (int i = 0; i < 10; i++) {
+		intgraph.addNodeByLabel(i);
+	    }
 	    string label;
+	    string firstNodeLabel;
+	    Node<string> firstNode;
 	    Dictionary<string,Node<string>> nodes = new Dictionary<string,Node<string>>();
 	    Console.WriteLine("Enter the graph's nodes:");
 	    label = Console.ReadLine();
+	    firstNodeLabel = label;
 	    while (label != "")
 	    {
 		nodes.Add(label,graph.addNodeByLabel(label));
@@ -37,10 +44,20 @@ namespace MainProgram
 		label = Console.ReadLine();
 	    }
 
-	    List<Node<string>> visited = graph.visitAll();
+	    firstNode = graph.GetNodeByLabel(firstNodeLabel);
+	    List<Node<string>> visited = graph.depthFrom(firstNode);
+	    List<string> labels = new List<string>();
 	    for (int i = 0; i < visited.Count; i++) {
-		Console.WriteLine(visited[i].contents);
+		labels.Add(visited[i].contents);
 	    }
+	    Console.WriteLine("Depth first: {0}", String.Join(", ", labels));
+
+	    visited = graph.breadthFrom(firstNode);
+	    labels = new List<string>();
+	    for (int i = 0; i < visited.Count; i++) {
+		labels.Add(visited[i].contents);
+	    }
+	    Console.WriteLine("Breadth first: {0}", String.Join(", ", labels));
 	}
     }
 }
@@ -50,12 +67,16 @@ namespace GraphStructures
     
     public class Node<T>
     {
-	private List<Node<T>> edges = new List<Node<T>>();
+	public List<Node<T>> edges = new List<Node<T>>();
 	public T contents { get; set; }
 	public bool marked { get; set; }
 
 	public Node(T c) {
 	    contents = c;
+	}
+
+	public bool compareLabel(T c) {
+	    return EqualityComparer<T>.Default.Equals(this.contents,c);
 	}
 	
 	public void addEdge(Node<T> node) {
@@ -66,10 +87,6 @@ namespace GraphStructures
 
 	public void removeEdge(Node<T> node) {
 	    edges.Remove(node);
-	}
-
-	public void visit() {
-	    marked = true;
 	}
 
 	/*
@@ -111,6 +128,16 @@ namespace GraphStructures
 	    return node;
 	}
 
+	public Node<T> GetNodeByLabel(T label) {
+	    foreach (Node<T> node in nodes)
+	    {
+		if (node.compareLabel(label)) {
+		    return node;
+		}
+	    }
+	    return null;
+	}
+	
 	public void clearAll() {
 	    nodes.ForEach(delegate(Node<T> node) {
 		    node.clear();
@@ -122,6 +149,51 @@ namespace GraphStructures
 	    List<Node<T>> visits = new List<Node<T>>();
 	    nodes[0].visitRecurse(ref visits);
 	    clearAll();
+	    return visits;
+	}
+
+	public List<Node<T>> depthFrom(Node<T> start) {
+	    clearAll();
+	    List<Node<T>> visits = new List<Node<T>>();
+	    Stack<Node<T>> stack = new Stack<Node<T>>();
+	    stack.Push(start);
+	    Node<T> current;
+	    while (stack.Count > 0) {
+		current = stack.Pop();
+		if (!current.marked)
+		{
+		    visits.Add(current);
+		    current.marked = true;
+		    for (int i = current.edges.Count - 1; i >= 0; i--) {
+			if (!current.edges[i].marked) {
+			    stack.Push(current.edges[i]);
+			}
+		    }
+		}
+		
+	    };
+	    return visits;
+	}
+
+	public List<Node<T>> breadthFrom(Node<T> start) {
+	    clearAll();
+	    List<Node<T>> visits = new List<Node<T>>();
+	    Queue<Node<T>> queue = new Queue<Node<T>>();
+	    queue.Enqueue(start);
+	    Node<T> current;
+	    while (queue.Count > 0) {
+		current = queue.Dequeue();
+		if (!current.marked)
+		{
+		    visits.Add(current);
+		    current.marked = true;
+		    for (int i = 0; i < current.edges.Count; i++) {
+			if (!current.edges[i].marked) {
+			    queue.Enqueue(current.edges[i]);
+			}
+		    }
+		}
+	    };
 	    return visits;
 	}
     }

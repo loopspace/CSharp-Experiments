@@ -176,13 +176,13 @@ namespace GraphStructures
 
     public class Edge
     {
-	private List<Node> Ends = new List<Node>();
+	private Node[] Ends = new Node[2];
 	public int Length {get; private set;}
 
 	public Edge (Node s, Node e, int l)
 	{
-	    Ends.Add(s);
-	    Ends.Add(e);
+	    Ends[0] = s;
+	    Ends[1] = e;
 	    Length = l;
 	    s.AddEdge(this);
 	    e.AddEdge(this);

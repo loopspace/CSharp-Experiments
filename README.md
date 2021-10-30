@@ -26,8 +26,24 @@ For compiling a project:
 xbuild Project.sln
 ~~~
 
+For compiling a single `cs` file with dependencies:
+
+~~~
+mono-csc
+-r:/usr/lib/mono/gac/OpenTK/1.1.0.0__bad199fe84eb3df4/OpenTK.dll
+Shader.cs
+~~~
+
+The program `Shader.cs` is a shader program that I've downloaded from
+somewhere, don't remember where, to get OpenGL working with C#.  I
+installed `opentk` via `apt` and that's where it ended up.
+
+Presumably there's some way to tell `mono` where to find libraries a
+bit like `LD_LIBRARY_PATH` for `gcc`.
+
 The executables run fine by themselves without needing to be called
 via `mono` (as some documentation suggests they might need to be).
+
 
 ## Types
 
